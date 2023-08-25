@@ -3,11 +3,6 @@ import dotenv from 'dotenv'
 import { TokenPayload } from '../models/User'
 
 dotenv.config()
-
-
-
-
-
 export class TokenManager {
     public createToken = (payload: TokenPayload): string => {
         const token = jwt.sign(
@@ -17,7 +12,7 @@ export class TokenManager {
                 expiresIn: process.env.JWT_EXPIRES_IN
             }
         )
-        return token
+        return token as string
     }
 
     public getPayload = (token: string): TokenPayload | null => {
