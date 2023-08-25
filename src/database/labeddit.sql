@@ -1,8 +1,9 @@
+-- Active: 1692905941923@@127.0.0.1@3306
 
 CREATE TABLE
     users (
         id TEXT PRIMARY KEY UNIQUE NOT NULL,
-        username TEXT NOT NULL,
+        name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT DEFAULT('NORMAL') NOT NULL,
