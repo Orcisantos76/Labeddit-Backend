@@ -14,7 +14,7 @@ export interface UserDB{
     email : string,
     password : string,
     role : USER_ROLES,
-    created_at : string
+    create_at : string
 }
 
 export interface UserModel{
@@ -22,7 +22,7 @@ export interface UserModel{
     name : string,
     email : string,
     role : USER_ROLES,
-    createdAt : string
+    createAt : string
 }
 
 export class User {
@@ -32,7 +32,7 @@ export class User {
         private email : string,
         private password : string,
         private role : USER_ROLES,
-        private createdAt : string
+        private createAt : string
     ){}
 
     public getId(): string{
@@ -63,7 +63,7 @@ export class User {
             email: this.email,
             password: this.password,
             role: this.role,
-            created_at: this.createdAt
+            create_at: this.createAt
         }
     }
     public toBusinessModel(): UserModel{
@@ -72,7 +72,7 @@ export class User {
             name: this.name,
             email: this.email,
             role: this.role,
-            createdAt: this.createdAt
+            createAt: this.createAt
         }
     }
     public toTokenPayload(): TokenPayload{

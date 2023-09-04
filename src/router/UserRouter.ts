@@ -20,3 +20,6 @@ const userController = new UserController(
         new HashManager()
     )
 )
+
+userRouter.post("/signup", userController.signup);
+userRouter.post("/login", userController.login);

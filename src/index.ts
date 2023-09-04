@@ -23,4 +23,3 @@ app.get("/ping", (req, res)=>{
     res.send("Funcionou!")
 })
 
-Parei no video 6 criei o roteamento proximo criar tipagens dos dtos 7

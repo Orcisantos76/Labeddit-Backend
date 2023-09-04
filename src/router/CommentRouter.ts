@@ -16,3 +16,8 @@ const commetController = new CommentController(
         new TokenManager()
     )
 )
+
+commentRouter.post("/:postId/comments", CommentController.createComment)
+commentRouter.put("/:postId/comments/:commentId", CommentController.editCommentById)
+commentRouter.put("/:postId/comments/:commentId/like", CommentController.likeOrDislikeComment)
+commentRouter.delete("/:postId/comments/:commentId", CommentController.deleteCommentById)

@@ -4,13 +4,13 @@ export interface CommentDB{ //referencia o banco de dados
     content: string,
     likes: number,
     dislikes: number,
-    created_at: string,
-    updated_at: string,
+    create_at: string,
+    update_at: string,
     creator_id: string
 }
 
 export interface CommentWithCreatorDB extends CommentDB{
-    creator_username: string
+    creator_name: string
 }
 
 export interface CommentModel { // referencia o front end
@@ -18,8 +18,8 @@ export interface CommentModel { // referencia o front end
     content: string,
     likes: number,
     dislikes: number,
-    createdAt: string,
-    updatedAt: string,
+    createAt: string,
+    updateAt: string,
     creator: {
         id: string,
         name: string
@@ -33,8 +33,8 @@ export class Comment {
         private content: string,
         private likes: number,
         private dislikes: number,
-        private createdAt: string,
-        private updatedAt: string,
+        private createAt: string,
+        private updateAt: string,
         private creatorId: string,
         private creatorName: string
         
@@ -44,8 +44,8 @@ export class Comment {
         this.content = newContent;
     }
 
-    public set UPDATED_AT (newUpdatedAte: string){
-        this.updatedAt = newUpdatedAte
+    public set UPDATE_AT (newUpdateAte: string){
+        this.updateAt = newUpdateAte
     }
 
     public addLike():void {
@@ -72,8 +72,8 @@ export class Comment {
             content: this.content,
             likes: this.likes,
             dislikes: this.dislikes,
-            created_at: this.createdAt,
-            updated_at: this.updatedAt
+            create_at: this.createAt,
+            update_at: this.updateAt
         }
     }
 
@@ -83,8 +83,8 @@ export class Comment {
             content: this.content,
             likes: this.likes,
             dislikes: this.dislikes,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt,
+            createAt: this.createAt,
+            updateAt: this.updateAt,
             creator: {
                 id: this.creatorId,
                 name: this.creatorName
