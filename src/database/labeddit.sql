@@ -1,4 +1,4 @@
--- Active: 1692905941923@@127.0.0.1@3306
+-- Active: 1692971309047@@127.0.0.1@3306
 
 CREATE TABLE
     users (
@@ -7,7 +7,7 @@ CREATE TABLE
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT DEFAULT('NORMAL') NOT NULL,
-        created_at TEXT DEFAULT(datetime('now')) NOT NULL
+        create_at TEXT DEFAULT(datetime('now')) NOT NULL
     );
 
 CREATE TABLE posts(

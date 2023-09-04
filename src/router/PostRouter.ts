@@ -14,3 +14,6 @@ const postController = new PostController(
         new TokenManager()
     )
 )
+postRouter.post("/", postController.createPost);
+postRouter.get("/", postController.getPosts);
+postRouter.put("/:postId/like", postController.likeOrDislikePost);
