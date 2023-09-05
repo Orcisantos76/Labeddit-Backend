@@ -102,6 +102,9 @@ export class Post{
     public removeDislike():void {
         this.dislikes -= 1
     }
+    set setContent(value: string) {
+        this.content = value;
+        }
 
     public toDBModel(): PostDB{
         return{
