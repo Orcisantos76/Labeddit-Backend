@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CommentBusiness } from "../business/CommentBusiness";
+import { commentBusiness } from "../business/CommentBusiness";
 import { CreateCommentSchema } from "../dtos/comment/createComment.dto";
 import { ZodError } from "zod";
 import { BaseError } from "../errors/BaseError";
@@ -12,7 +12,7 @@ import { GetCommentsByPostSchema } from "../dtos/comment/getCommentsByPost.dto";
 import { GetCommentsLikesDislikesSchema } from "../dtos/comment/getCommentsLikesDislikes.dto";
 
 export class CommentController {
-  constructor(private commentBusiness: CommentBusiness) {}
+  constructor(private commentBusiness: commentBusiness) {}
   public createComment = async (req: Request, res: Response) => {
     try {
       const input = CreateCommentSchema.parse({
