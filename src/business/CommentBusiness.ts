@@ -46,7 +46,7 @@ import { USER_ROLES } from "../models/User";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManager";
 
-export class CommentBusiness {
+export class commentBusiness {
   constructor(
     private userDatabase: UserDatabase,
     private commentDatabase: CommentDatabase,
