@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { commentBusiness } from "../business/CommentBusiness";
-import { CreateCommentSchema } from "../dtos/comment/createComment.dto";
 import { ZodError } from "zod";
 import { BaseError } from "../errors/BaseError";
+import { CommentBusiness } from "../business/CommentBusiness";
+import { CreateCommentSchema } from "../dtos/comment/createComment.dto";
 import { GetCommentsSchema } from "../dtos/comment/getComments.dto";
 import { EditCommentSchema } from "../dtos/comment/editComment.dto";
 import { DeleteCommentSchema } from "../dtos/comment/deleteComment.dto";
@@ -12,7 +12,7 @@ import { GetCommentsByPostSchema } from "../dtos/comment/getCommentsByPost.dto";
 import { GetCommentsLikesDislikesSchema } from "../dtos/comment/getCommentsLikesDislikes.dto";
 
 export class CommentController {
-  constructor(private commentBusiness: commentBusiness) {}
+  constructor(private commentBusiness: CommentBusiness) {}
   public createComment = async (req: Request, res: Response) => {
     try {
       const input = CreateCommentSchema.parse({
