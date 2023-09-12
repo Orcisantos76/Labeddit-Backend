@@ -1,85 +1,83 @@
 export enum USER_ROLES {
-    NORMAL = "NORMAL",
-    ADMIN = "ADMIN"
-} // realocar para o arquivo da entidade User
-export interface TokenPayload {
-    id: string,
-    name: string,
-    role: USER_ROLES
-} // realocar para o arquivo da entidade User
-
-export interface UserDB{
-    id : string,
-    name : string,
-    email : string,
-    password : string,
-    role : USER_ROLES,
-    create_at : string
+  NORMAL = "NORMAL",
+  ADMIN = "ADMIN",
 }
 
-export interface UserModel{
-    id : string,
-    name : string,
-    email : string,
-    role : USER_ROLES,
-    createAt : string
+export interface TokenPayload {
+  id: string;
+  nickname: string;
+  role: USER_ROLES;
+}
+
+export interface UserDB {
+  id: string;
+  nickname: string;
+  email: string;
+  password: string;
+  role: USER_ROLES;
+  created_at: string;
+}
+
+export interface UserModel {
+  id: string;
+  nickname: string;
+  email: string;
+  role: USER_ROLES;
+  createdAt: string;
 }
 
 export class User {
-    constructor (
-        private id : string,
-        private name : string,
-        private email : string,
-        private password : string,
-        private role : USER_ROLES,
-        private createAt : string
-    ){}
+  constructor(
+    private id: string,
+    private nickname: string,
+    private email: string,
+    private password: string,
+    private role: USER_ROLES,    
+    private createdAt: string
+  ) {}
 
-    public getId(): string{
-        return this.id;
-    }
+  get getId(): string {
+    return this.id;
+  }
 
-    public getName(): string{
-        return this.name;
-    }
-    public setName(newName: string){
-        this.name = newName
-    }
+  get getNickname(): string {
+    return this.nickname;
+  }
 
-    public getEmail(): string {
-        return this.email;
-    }
-    public setEmail(newEmail: string) {
-        this.email = newEmail;
-    }
-    public setPassword(newPassword: string){
-        this.password = newPassword
-    }
+  set setNickname(value: string) {
+    this.nickname = value;
+  }
 
-    public toDBModel(): UserDB{
-        return{
-            id: this.id,
-            name: this.name,
-            email: this.email,
-            password: this.password,
-            role: this.role,
-            create_at: this.createAt
-        }
-    }
-    public toBusinessModel(): UserModel{
-        return{
-            id: this.id,
-            name: this.name,
-            email: this.email,
-            role: this.role,
-            createAt: this.createAt
-        }
-    }
-    public toTokenPayload(): TokenPayload{
-        return{
-            id: this.id,
-            name: this.name,
-            role: this.role
-        }
-    }
+  set setEmail(value: string) {
+    this.email = value;
+  }
+
+  set setPassword(value: string) {
+    this.password = value;
+  }
+
+  get getRole(): USER_ROLES {
+    return this.role;
+  }
+
+  public toDBModel(): UserDB {
+    return {
+      id: this.id,
+      nickname: this.nickname,
+      email: this.email,
+      password: this.password,
+      role: this.role,
+      created_at: this.createdAt,
+    };
+  }
+
+  public toBusinessModel(): UserModel {
+    return {
+      id: this.id,
+      nickname: this.nickname,
+      email: this.email,
+      role: this.role,
+      createdAt: this.createdAt,
+    };
+  }
 }

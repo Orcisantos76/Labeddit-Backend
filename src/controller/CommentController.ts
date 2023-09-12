@@ -1,117 +1,202 @@
 import { Request, Response } from "express";
-import { ZodError } from "zod";
 import { CommentBusiness } from "../business/CommentBusiness";
+import { CreateCommentSchema } from "../dtos/comment/createComment.dto";
+import { ZodError } from "zod";
 import { BaseError } from "../errors/BaseError";
-import { CreateCommentInputDTo, CreateCommentSchema } from "../dtos/Comment/createComment.dto";
-import { EditCommentByIdInputDTO, EditCommentByIdOutputDTO, EditCommentByIdSchema } from "../dtos/Comment/editComment.dtos";
-import { LikeOrDislikeCommentInputDTO, LikeOrDislikeCommentOutputDTO, LikeOrDislikeCommentSchema } from "../dtos/Comment/likeOrDislikeComment.dto";
-import { DeleteCommentByIdInputDTO, DeleteCommentByIdOutputDTO, DeleteCommentByIdSchema } from "../dtos/Comment/deleteComment.dto";
+import { GetCommentsSchema } from "../dtos/comment/getComments.dto";
+import { EditCommentSchema } from "../dtos/comment/editComment.dto";
+import { DeleteCommentSchema } from "../dtos/comment/deleteComment.dto";
+import { LikeOrDislikeCommentSchema } from "../dtos/comment/likeOrDislikeComment.dto";
+import { GetCommentsByUserNicknameSchema } from "../dtos/comment/getCommentsByUserNickname.dto";
+import { GetCommentsByPostSchema } from "../dtos/comment/getCommentsByPost.dto";
+import { GetCommentsLikesDislikesSchema } from "../dtos/comment/getCommentsLikesDislikes.dto";
 
 export class CommentController {
-    static deleteCommentById(arg0: string, deleteCommentById: any) {
-        throw new Error("Method not implemented.");
+  constructor(private commentBusiness: CommentBusiness) {}
+  public createComment = async (req: Request, res: Response) => {
+    try {
+      const input = CreateCommentSchema.parse({
+        postId: req.params.id,
+        token: req.headers.authorization,
+        content: req.body.content,
+      });
+
+      const output = await this.commentBusiness.createComment(input);
+
+      res.status(201).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    static likeOrDislikeComment(arg0: string, likeOrDislikeComment: any) {
-        throw new Error("Method not implemented.");
+  };
+
+  public getComments = async (req: Request, res: Response) => {
+    try {
+      const input = GetCommentsSchema.parse({
+        token: req.headers.authorization,
+      });
+
+      const output = await this.commentBusiness.getComments(input);
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    static editCommentById(arg0: string, editCommentById: any) {
-        throw new Error("Method not implemented.");
+  };
+
+  public getCommentsByUserNickname = async (req: Request, res: Response) => {
+    try {
+      const input = GetCommentsByUserNicknameSchema.parse({
+        nickname: req.params.nickname,
+        token: req.headers.authorization,
+      });
+
+      const output = await this.commentBusiness.getCommentsByUserNickname(
+        input
+      );
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    static createComment(arg0: string, createComment: any) {
-        throw new Error("Method not implemented.");
+  };
+
+  public getCommentsByPost = async (req: Request, res: Response) => {
+    try {
+      const input = GetCommentsByPostSchema.parse({
+        postId: req.params.id,
+        token: req.headers.authorization,
+      });
+
+      const output = await this.commentBusiness.getCommentsByPost(input);
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    constructor(
-        private commentBusiness: CommentBusiness
-    ) { }
+  };
 
-    public createComment = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const input: CreateCommentInputDTo = CreateCommentSchema.parse({
-                postId: req.params.postId,
-                content: req.body.content,
-                token: req.headers.authorization
-            })
-        } catch (error) {
-            console.log(error);
+  public editComment = async (req: Request, res: Response) => {
+    try {
+      const input = EditCommentSchema.parse({
+        idToEdit: req.params.id,
+        token: req.headers.authorization,
+        content: req.body.content,
+      });
 
-            if (error instanceof ZodError) {
-                res.status(400).send(error.issues);
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message);
-            } else {
-                res.status(500).send("Unexpected Error");
-            }
-        }
+      const output = await this.commentBusiness.editComment(input);
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    public editCommentById = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const input: EditCommentByIdInputDTO = EditCommentByIdSchema.parse({
-                postId: req.params.postId,
-                commentId: req.params.commentId,
-                content: req.body.content,
-                token: req.headers.authorization
-            })
+  };
 
-            const output: EditCommentByIdOutputDTO = await this.commentBusiness.editCommentById(input)
-            res.status(200).send(output)
+  public deleteComment = async (req: Request, res: Response) => {
+    try {
+      const input = DeleteCommentSchema.parse({
+        idToDelete: req.params.id,
+        token: req.headers.authorization,
+      });
 
-        } catch (error) {
-            console.log(error)
+      const output = await this.commentBusiness.deleteComment(input);
 
-            if (error instanceof ZodError) {
-                res.status(400).send(`${error.issues[0].path[0]}: ${error.issues[0].message}`)
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message)
-            } else {
-                res.status(500).send("Erro inesperado.")
-            }
-        }
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    public deleteCommentById = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const input: DeleteCommentByIdInputDTO = DeleteCommentByIdSchema.parse({
-                postId: req.params.postId,
-                commentId: req.params.commentId,
-                token: req.headers.authorization
-            })
+  };
 
-            const output: DeleteCommentByIdOutputDTO = await this.commentBusiness.deleteCommentById(input)
-            res.status(200).send(output)
+  public likeOrDislikeComment = async (req: Request, res: Response) => {
+    try {
+      const input = LikeOrDislikeCommentSchema.parse({
+        commentId: req.params.id,
+        token: req.headers.authorization,
+        like: req.body.like,
+      });
 
-        } catch (error) {
-            console.log(error)
+      const output = await this.commentBusiness.likeOrDislikeComment(input);
 
-            if (error instanceof ZodError) {
-                res.status(400).send(`${error.issues[0].path[0]}: ${error.issues[0].message}`)
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message)
-            } else {
-                res.status(500).send("Erro inesperado.")
-            }
-        }
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
-    public likeOrDislikeComment = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const input: LikeOrDislikeCommentInputDTO = LikeOrDislikeCommentSchema.parse({
-                postId: req.params.postId,
-                commentId: req.params.commentId,
-                token: req.headers.authorization,
-                like: req.body.like
-            })
+  };
 
-            const output: LikeOrDislikeCommentOutputDTO = await this.commentBusiness.likeOrDislikeComment(input)
-            res.status(200).send(output)
+  public getCommentsLikesDislikes = async (req: Request, res: Response) => {
+    try {
+      const input = GetCommentsLikesDislikesSchema.parse({
+        token: req.headers.authorization,
+      });
 
-        } catch (error) {
-            console.log(error)
+      const output = await this.commentBusiness.getCommentsLikesDislikes(input);
 
-            if (error instanceof ZodError) {
-                res.status(400).send(`${error.issues[0].path[0]}: ${error.issues[0].message}`)
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message)
-            } else {
-                res.status(500).send("Erro inesperado.")
-            }
-        }
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
     }
+  };
 }

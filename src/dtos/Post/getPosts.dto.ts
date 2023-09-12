@@ -1,26 +1,19 @@
-import { z } from "zod"
+import z from "zod";
+import { PostModel } from "../../models/Post";
 
-export const GetPostsSchema = z.object({
-    query: z.string().min(1).optional(),
-    token: z.string().min(1)
-})
+export interface GetPostsInputDTO {    
+  token: string;
+}
 
-export type GetPostsInputDTO = z.infer<typeof GetPostsSchema>
+export type GetPostsOutputDTO = PostModel[];
 
-export const GetPostsSchemaOutput = z.array(
-    z.object({
-        id: z.string(),
-        content: z.string(),
-        comments: z.number(),
-        likes: z.number(),
-        dislikes: z.number(),
-        createAt: z.string(),
-        updateAt: z.string(),
-        creator: z.object({
-            id: z.string(),
-            name: z.string()
-        })
-    })
-)
-
-export type GetPostsOutputDTO = z.infer<typeof GetPostsSchemaOutput>
+export const GetPostsSchema = z
+  .object({
+    token: z
+      .string({
+        required_error: "'token' é obrigatória",
+        invalid_type_error: "'token' deve ser do tipo string",
+      })
+      .min(1, "'token' deve possuir no mínimo 1 caractere"),
+  })
+  .transform((data) => data as GetPostsInputDTO);
