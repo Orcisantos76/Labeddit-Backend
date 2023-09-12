@@ -1,255 +1,436 @@
 import { CommentDatabase } from "../database/CommentDatabase";
-import { PostDatabase } from "../database/PostDatabase";
-import { CreateCommentInputDTo, CreateCommentOutputDTo } from "../dtos/Comment/createComment.dto";
-import { DeleteCommentByIdInputDTO, DeleteCommentByIdOutputDTO } from "../dtos/Comment/deleteComment.dto";
-import { EditCommentByIdInputDTO, EditCommentByIdOutputDTO } from "../dtos/Comment/editComment.dtos";
-import { LikeOrDislikeCommentInputDTO, LikeOrDislikeCommentOutputDTO } from "../dtos/Comment/likeOrDislikeComment.dto";
+import { UserDatabase } from "../database/UserDatabase";
+import {
+  CreateCommentInputDTO,
+  CreateCommentOutputDTO,
+} from "../dtos/comment/createComment.dto";
+import {
+  DeleteCommentInputDTO,
+  DeleteCommentOutputDTO,
+} from "../dtos/comment/deleteComment.dto";
+import {
+  EditCommentInputDTO,
+  EditCommentOutputDTO,
+} from "../dtos/comment/editComment.dto";
+import {
+  GetCommentsInputDTO,
+  GetCommentsOutputDTO,
+} from "../dtos/comment/getComments.dto";
+import {
+  GetCommentsByPostInputDTO,
+  GetCommentsByPostOutputDTO,
+} from "../dtos/comment/getCommentsByPost.dto";
+import {
+  GetCommentsByUserNicknameInputDTO,
+  GetCommentsByUserNicknameOutputDTO,
+} from "../dtos/comment/getCommentsByUserNickname.dto";
+import {
+  GetCommentsLikesDislikesInputDTO,
+  GetCommentsLikesDislikesOutputDTO,
+} from "../dtos/comment/getCommentsLikesDislikes.dto";
+import {
+  LikeOrDislikeCommentInputDTO,
+  LikeOrDislikeCommentOutputDTO,
+} from "../dtos/comment/likeOrDislikeComment.dto";
+import { ConflictError } from "../errors/ConflictError";
 import { ForbiddenError } from "../errors/ForbiddenError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
-import { Comment, CommentDB, CommentWithCreatorDB } from "../models/Comments";
-import { COMMENT_LIKE, LikeOrDislikeComment } from "../models/LikeOrDislike";
-import { Post, PostDB, PostWithCreatorDb } from "../models/Post";
-import { TokenPayload, USER_ROLES } from "../models/User";
+import {
+  LikeDislikeDB,
+  COMMENT_LIKE,
+  Comment,
+  CommentLikeDislike,
+} from "../models/Comment";
+import { USER_ROLES } from "../models/User";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManager";
 
 export class CommentBusiness {
-    constructor(
-        private commentDatabase: CommentDatabase,
-        private postDatabase: PostDatabase,
-        private idGenerator: IdGenerator,
-        private tokenManager: TokenManager
-    ) { }
-    public createComment = async (input: CreateCommentInputDTo): Promise<CreateCommentOutputDTo> => {
+  constructor(
+    private userDatabase: UserDatabase,
+    private commentDatabase: CommentDatabase,
+    private idGenerator: IdGenerator,
+    private tokenManager: TokenManager
+  ) {}
 
-        const { postId, content, token } = input
+  public createComment = async (
+    input: CreateCommentInputDTO
+  ): Promise<CreateCommentOutputDTO> => {
+    const { postId, token, content } = input;
 
-        const payload: TokenPayload | null = this.tokenManager.getPayload(token)
+    const payload = this.tokenManager.getPayload(token);
 
-        if (!payload) {
-            throw new UnauthorizedError()
-        }
-
-        const postDB: PostDB | undefined = await this.postDatabase.getPostById(postId)
-
-        if (!postDB) {
-            throw new NotFoundError("Post não encontrado. Verifique o id e tente novamente.")
-        }
-
-        const post = new Post(
-            postDB.id,
-            postDB.content,
-            postDB.comments,
-            postDB.likes,
-            postDB.dislikes,
-            postDB.create_at,
-            postDB.update_at,
-            postDB.creator_id,
-            payload.name
-        )
-
-        const id: string = this.idGenerator.generate()
-
-        const newComment = new Comment(
-            id,
-            postId,
-            content,
-            0,
-            0,
-            new Date().toISOString(),
-            new Date().toISOString(),
-            payload.id,
-            payload.name
-        )
-
-        const newCommentDB: CommentDB = newComment.toDBModel()
-        await this.commentDatabase.insertComment(newCommentDB)
-
-        post.addComment()
-        const updatePostDB: PostDB = post.toDBModel()
-        await this.postDatabase.updatePostById(updatePostDB)
-
-        const output: CreateCommentOutputDTo = {
-            message: "Comentário criado com sucesso!"
-        }
-
-        return output as CreateCommentOutputDTo
-    }
-    public editCommentById = async (input: EditCommentByIdInputDTO): Promise<EditCommentByIdOutputDTO> => {
-        const { postId, commentId, content, token } = input
-
-        const payload: TokenPayload | null = this.tokenManager.getPayload(token)
-
-        if (!payload) {
-            throw new UnauthorizedError()
-        }
-
-        const postDB: PostDB | undefined = await this.postDatabase.getPostById(postId)
-
-        if (!postDB) {
-            throw new NotFoundError("Post não encontrado. Verifique o id e tente novamente.")
-        }
-
-        const commentDB: CommentDB | undefined = await this.commentDatabase.getCommentById(commentId)
-
-        if (!commentDB) {
-            throw new NotFoundError("Comentário não encontrado. Verifique o id e tente novamente.")
-        }
-
-        if (payload.role !== USER_ROLES.ADMIN) {
-            if (payload.id !== commentDB.creator_id) {
-                throw new ForbiddenError("Somente o criador do comentário ou um ADMIN podem editá-lo. Caso não tenha acesso a sua conta, entre em contato com nosso suporte.")
-            }
-        }
-
-        const comment = new Comment(
-            commentDB.id,
-            commentDB.post_id,
-            commentDB.content,
-            commentDB.likes,
-            commentDB.dislikes,
-            commentDB.create_at,
-            commentDB.update_at,
-            commentDB.creator_id,
-            payload.name
-        )
-
-        comment.CONTENT = content
-        comment.UPDATE_AT = new Date().toISOString()
-
-        const updateCommentDB: CommentDB = comment.toDBModel()
-        await this.commentDatabase.updateCommentById(updateCommentDB)
-
-        const output: EditCommentByIdOutputDTO = {
-            message: "Comentário atualizado com sucesso!",
-        }
-
-        return output
-    }
-    public deleteCommentById = async (input: DeleteCommentByIdInputDTO): Promise<DeleteCommentByIdOutputDTO> => {
-
-        const { postId, commentId, token } = input
-
-        const payload: TokenPayload | null = this.tokenManager.getPayload(token)
-
-        if (!payload) {
-            throw new UnauthorizedError()
-        }
-
-        const commentDB: CommentDB | undefined = await this.commentDatabase.getCommentById(commentId)
-
-        if (!commentDB) {
-            throw new NotFoundError("Comentário não encontrado. Verifique o id e tente novamente.")
-        }
-
-        const postWithCreatorDB: PostWithCreatorDb | undefined = await this.postDatabase.getPostWithCreatorById(postId)
-
-        if (!postWithCreatorDB) {
-            throw new NotFoundError("Post não encontrado. Verifique o id e tente novamente.")
-        }
-
-        if (payload.role !== USER_ROLES.ADMIN) {
-            if (payload.id !== postWithCreatorDB.creator_id) {
-                if (payload.id !== commentDB.creator_id) {
-                    throw new ForbiddenError("Somente o autor do comentário, o autor do post ou um ADMIN podem excluir o comentário. Caso não tenha acesso a sua conta, entre em contato com nosso suporte.")
-                }
-            }
-        }
-
-        await this.commentDatabase.deleteCommentById(commentId)
-
-        const post = new Post(
-            postWithCreatorDB.id,
-            postWithCreatorDB.content,
-            postWithCreatorDB.comments,
-            postWithCreatorDB.likes,
-            postWithCreatorDB.dislikes,
-            postWithCreatorDB.create_at,
-            postWithCreatorDB.update_at,
-            postWithCreatorDB.creator_id,
-            postWithCreatorDB.creator_name,
-        )
-
-        post.removeComment()
-        const updatePostDB: PostDB = post.toDBModel()
-        await this.postDatabase.updatePostById(updatePostDB)
-
-        const output: DeleteCommentByIdOutputDTO = {
-            message: "Comentário excluído com sucesso!",
-        }
-
-        return output as DeleteCommentByIdOutputDTO
+    if (!payload) {
+      throw new UnauthorizedError();
     }
 
-    public likeOrDislikeComment = async (input: LikeOrDislikeCommentInputDTO): Promise<LikeOrDislikeCommentOutputDTO> => {
+    const postDB = await this.commentDatabase.findPostById(postId);
 
-        const { postId, commentId, token, like } = input
-
-        const payload: TokenPayload | null = this.tokenManager.getPayload(token)
-
-        if (!payload) {
-            throw new UnauthorizedError()
-        }
-
-        const commentWithCreatorDB: CommentWithCreatorDB | undefined = await this.commentDatabase.getCommentWithCreatorById(commentId)
-
-        if (!commentWithCreatorDB) {
-            throw new NotFoundError("Comentário não encontrado. Verifique o id e tente novamente.")
-        }
-
-        const postDB: PostDB | undefined = await this.postDatabase.getPostById(postId)
-
-        if (!postDB) {
-            throw new NotFoundError("Post não encontrado. Verifique o id e tente novamente.")
-        }
-
-        if (payload.id === commentWithCreatorDB.creator_id) {
-            throw new ForbiddenError("Não dar like no seu proprio post.")
-        }
-
-        const comment = new Comment(
-            commentWithCreatorDB.id,
-            commentWithCreatorDB.post_id,
-            commentWithCreatorDB.content,
-            commentWithCreatorDB.likes,
-            commentWithCreatorDB.dislikes,
-            commentWithCreatorDB.create_at,
-            commentWithCreatorDB.update_at,
-            commentWithCreatorDB.creator_id,
-            commentWithCreatorDB.creator_name
-        )
-
-        const likeDislikeComment = new LikeOrDislikeComment(
-            payload.id,
-            postId,
-            commentId,
-            like
-        )
-
-        const likeDislikeCommentDB = likeDislikeComment.toDBModel()
-
-        const likeDislikeExists: COMMENT_LIKE | undefined = await this.commentDatabase.getLikeDislikeFromCommentById(likeDislikeCommentDB)
-
-        likeDislikeExists === COMMENT_LIKE.ALREADY_LIKED && like ?
-            (await this.commentDatabase.removeLikeDislikeFromCommentById(likeDislikeCommentDB), comment.removeLike())
-            : likeDislikeExists === COMMENT_LIKE.ALREADY_LIKED && !like ?
-                (await this.commentDatabase.updateLikeDislikeFromCommentById(likeDislikeCommentDB), comment.removeLike(), comment.addDislike())
-                : likeDislikeExists === COMMENT_LIKE.ALREADY_DISLIKED && !like ?
-                    (await this.commentDatabase.removeLikeDislikeFromCommentById(likeDislikeCommentDB), comment.removeDislike())
-                    : likeDislikeExists === COMMENT_LIKE.ALREADY_DISLIKED && like ?
-                        (await this.commentDatabase.updateLikeDislikeFromCommentById(likeDislikeCommentDB), comment.removeDislike(), comment.addLike())
-                        : likeDislikeExists === undefined && like ?
-                            (await this.commentDatabase.insertLikeDislikeInCommentById(likeDislikeCommentDB), comment.addLike())
-                            : (await this.commentDatabase.insertLikeDislikeInCommentById(likeDislikeCommentDB), comment.addDislike())
-
-        const updateCommentDB: CommentDB = comment.toDBModel()
-
-        await this.commentDatabase.updateCommentById(updateCommentDB)
-
-        const output: LikeOrDislikeCommentOutputDTO = undefined
-        return output as LikeOrDislikeCommentOutputDTO
-
+    if (!postDB) {
+      throw new NotFoundError("'post' com essa id não existe!");
     }
 
+    const id = this.idGenerator.generate();
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+    const second = String(date.getSeconds()).padStart(2, "0");
+
+    const dateString = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    
+    const user = await this.userDatabase.findUserByNickname(payload.nickname);
+
+    if (user) {
+      const comment = new Comment(
+        id,
+        postId,
+        content,
+        0,
+        0,
+        dateString,
+        dateString,
+        payload.id,
+        payload.nickname
+      );
+      const commentDB = comment.toDBModel();
+      await this.commentDatabase.insertComment(commentDB);
+    }
+
+    const output: CreateCommentOutputDTO = {
+      message: "Comentário criado com sucesso!",
+    };
+
+    return output;
+  };
+
+  public getComments = async (
+    input: GetCommentsInputDTO
+  ): Promise<GetCommentsOutputDTO> => {
+    const { token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const commentsDBwithCreatorName =
+      await this.commentDatabase.getCommentsWithCreatorName();
+
+    const comments = commentsDBwithCreatorName.map((commentWithCreatorName) => {
+      const comment = new Comment(
+        commentWithCreatorName.id,
+        commentWithCreatorName.post_id,
+        commentWithCreatorName.content,
+        commentWithCreatorName.likes,
+        commentWithCreatorName.dislikes,
+        commentWithCreatorName.created_at,
+        commentWithCreatorName.updated_at,
+        commentWithCreatorName.creator_id,
+        commentWithCreatorName.creator_nickname
+      );
+
+      return comment.toBusinessModel();
+    });
+
+    const output: GetCommentsOutputDTO = comments;
+
+    return output;
+  };
+
+  public getCommentsByUserNickname = async (
+    input: GetCommentsByUserNicknameInputDTO
+  ): Promise<GetCommentsByUserNicknameOutputDTO> => {
+    const { nickname, token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const commentsDBwithCreatorName =
+      await this.commentDatabase.getCommentsWithCreatorNameByNickname(nickname);
+
+    const comments = commentsDBwithCreatorName.map((commentWithCreatorName) => {
+      const comment = new Comment(
+        commentWithCreatorName.id,
+        commentWithCreatorName.post_id,
+        commentWithCreatorName.content,
+        commentWithCreatorName.likes,
+        commentWithCreatorName.dislikes,
+        commentWithCreatorName.created_at,
+        commentWithCreatorName.updated_at,
+        commentWithCreatorName.creator_id,
+        commentWithCreatorName.creator_nickname
+      );
+
+      if (payload.role !== USER_ROLES.ADMIN) {
+        if (payload.id !== commentWithCreatorName.creator_id) {
+          throw new ForbiddenError(
+            "Somente admin e o próprio usuário podem acessar esse endpoint!"
+          );
+        }
+      }
+
+      return comment.toBusinessModel();
+    });
+
+    const output: GetCommentsOutputDTO = comments;
+
+    return output;
+  };
+
+  public getCommentsByPost = async (
+    input: GetCommentsByPostInputDTO
+  ): Promise<GetCommentsByPostOutputDTO> => {
+    const { postId, token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const postDB = await this.commentDatabase.findPostById(postId);
+
+    if (!postDB) {
+      throw new NotFoundError("'post' com essa id não existe!");
+    }
+
+    const commentsDBwithCreatorName =
+      await this.commentDatabase.getCommentsWithCreatorNameById(postDB.id);
+
+    const comments = commentsDBwithCreatorName.map((commentWithCreatorName) => {
+      const comment = new Comment(
+        commentWithCreatorName.id,
+        commentWithCreatorName.post_id,
+        commentWithCreatorName.content,
+        commentWithCreatorName.likes,
+        commentWithCreatorName.dislikes,
+        commentWithCreatorName.created_at,
+        commentWithCreatorName.updated_at,
+        commentWithCreatorName.creator_id,
+        commentWithCreatorName.creator_nickname
+      );
+
+      return comment.toBusinessModel();
+    });
+
+    const output: GetCommentsOutputDTO = comments;
+
+    return output;
+  };
+
+  public editComment = async (
+    input: EditCommentInputDTO
+  ): Promise<EditCommentOutputDTO> => {
+    const { idToEdit, token, content } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const commentDB = await this.commentDatabase.findCommentById(idToEdit);
+
+    if (!commentDB) {
+      throw new NotFoundError("'comment' com essa id não existe!");
+    }
+
+    if (payload.id !== commentDB.creator_id) {
+      throw new ForbiddenError("Somente quem criou o 'comment' pode editá-la!");
+    }
+
+    const contentDB = await this.commentDatabase.findCommentByContent(
+      content,
+      commentDB.creator_id
+    );
+
+    if (contentDB) {
+      throw new ConflictError("Já existe um 'comment' com esse conteúdo!");
+    }
+
+
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+    const second = String(date.getSeconds()).padStart(2, "0");
+    const dateString = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+
+    const comment = new Comment(
+      commentDB.id,
+      commentDB.post_id,
+      commentDB.content,
+      commentDB.likes,
+      commentDB.dislikes,
+      commentDB.created_at,
+      commentDB.updated_at,
+      commentDB.creator_id,
+      payload.nickname
+    );
+
+    comment.setContent = content;
+    comment.setUpdatedAt = dateString;
+
+    const updatedCommentDB = comment.toDBModel();
+    await this.commentDatabase.updateComment(updatedCommentDB);
+
+    const output: EditCommentOutputDTO = {
+      message: "'comment' editado com sucesso!",
+    };
+
+    return output;
+  };
+
+  public deleteComment = async (
+    input: DeleteCommentInputDTO
+  ): Promise<DeleteCommentOutputDTO> => {
+    const { idToDelete, token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const commentDB = await this.commentDatabase.findCommentById(idToDelete);
+
+    if (!commentDB) {
+      throw new NotFoundError("'comment' com essa id não existe!");
+    }
+
+    if (payload.role !== USER_ROLES.ADMIN) {
+      if (payload.id !== commentDB.creator_id) {
+        throw new ForbiddenError(
+          "Somente quem criou o 'comment' pode deletar!"
+        );
+      }
+    }
+
+    await this.commentDatabase.deleteCommentById(idToDelete);
+
+    const output: DeleteCommentOutputDTO = {
+      message: "'comment' deletado com sucesso!",
+    };
+
+    return output;
+  };
+
+  public likeOrDislikeComment = async (
+    input: LikeOrDislikeCommentInputDTO
+  ): Promise<LikeOrDislikeCommentOutputDTO> => {
+    const { commentId, token, like } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const commentDBWithCreatorName =
+      await this.commentDatabase.findCommentWithCreatorNameById(commentId);
+
+    if (!commentDBWithCreatorName) {
+      throw new NotFoundError("comment com essa id não existe");
+    }
+
+    if (payload && payload.id === commentDBWithCreatorName.creator_id) {
+      throw new ConflictError(
+        "Você não pode dar like ou deslike no 'comment' que você criou!"
+      );
+    }
+
+    const comment = new Comment(
+      commentDBWithCreatorName.id,
+      commentDBWithCreatorName.post_id,
+      commentDBWithCreatorName.content,
+      commentDBWithCreatorName.likes,
+      commentDBWithCreatorName.dislikes,
+      commentDBWithCreatorName.created_at,
+      commentDBWithCreatorName.updated_at,
+      commentDBWithCreatorName.creator_id,
+      commentDBWithCreatorName.creator_nickname,
+    );
+
+    const likeSQlite = like ? 1 : 0;
+
+    const likeDislikeDB: LikeDislikeDB = {
+      user_id: payload.id,
+      comment_id: commentId,
+      like: likeSQlite,
+    };
+
+    const likeDislikeExists = await this.commentDatabase.findLikeDislike(
+      likeDislikeDB
+    );
+
+    if (likeDislikeExists === COMMENT_LIKE.LIKED) {
+      if (like) {
+        await this.commentDatabase.removeLikeDislike(likeDislikeDB);
+        comment.removeLike();
+      } else {
+        await this.commentDatabase.updateLikeDislike(likeDislikeDB);
+        comment.removeLike();
+        comment.addDislike();
+      }
+    } else if (likeDislikeExists === COMMENT_LIKE.DISLIKED) {
+      if (!like) {
+        await this.commentDatabase.removeLikeDislike(likeDislikeDB);
+        comment.removeDislike();
+      } else {
+        await this.commentDatabase.updateLikeDislike(likeDislikeDB);
+        comment.removeDislike();
+        comment.addLike();
+      }
+    } else {
+      await this.commentDatabase.insertLikeDislike(likeDislikeDB);
+      like ? comment.addLike() : comment.addDislike();
+    }
+
+    const updatedCommentDB = comment.toDBModel();
+    await this.commentDatabase.updateComment(updatedCommentDB);
+
+    const output: LikeOrDislikeCommentOutputDTO = undefined;
+
+    return output;
+  };
+
+  public getCommentsLikesDislikes = async (
+    input: GetCommentsLikesDislikesInputDTO
+  ): Promise<GetCommentsLikesDislikesOutputDTO> => {
+    const { token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const comments = await this.commentDatabase.getCommentsLikeDeslike();
+
+    const commentsLikeDislike = comments.map((commentLD) => {
+      const commentLikeDislike = new CommentLikeDislike(
+        commentLD.user_id,
+        commentLD.comment_id,
+        commentLD.like
+      );
+
+      return commentLikeDislike.toBusinessModel();
+    });
+
+    const output: GetCommentsLikesDislikesOutputDTO = commentsLikeDislike;
+
+    return output;
+  };
 }
