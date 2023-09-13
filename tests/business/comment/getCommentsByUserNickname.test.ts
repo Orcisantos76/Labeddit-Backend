@@ -35,9 +35,7 @@ describe("Testando getCommentsByUserNickname", () => {
         creator: {
           id: "id-mock-fulano",
           nickname: "Fulano",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-        },
+          },
       },
     ]);
   });

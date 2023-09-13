@@ -29,8 +29,6 @@ describe("Testando getUsers", () => {
         nickname: "Fulano",
         email: "fulano@email.com",
         role: USER_ROLES.NORMAL,
-        avatar:
-          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         createdAt: expect.any(String),
       },
       {
@@ -38,8 +36,6 @@ describe("Testando getUsers", () => {
         nickname: "Astrodev",
         email: "astrodev@email.com",
         role: USER_ROLES.ADMIN,
-        avatar:
-          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         createdAt: expect.any(String),
       },
       {
@@ -47,8 +43,6 @@ describe("Testando getUsers", () => {
         nickname: "Beltrana",
         email: "beltrana@email.com",
         role: USER_ROLES.NORMAL,
-        avatar:
-          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         createdAt: expect.any(String),
       },
     ]);
@@ -69,8 +63,6 @@ describe("Testando getUsers", () => {
         nickname: "Astrodev",
         email: "astrodev@email.com",
         role: USER_ROLES.ADMIN,
-        avatar:
-          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         createdAt: expect.any(String),
       },
     ]);

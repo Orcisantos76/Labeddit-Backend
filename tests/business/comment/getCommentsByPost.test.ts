@@ -36,9 +36,7 @@ describe("Testando getCommentsByPost", () => {
         creator: {
           id: "id-mock-fulano",
           nickname: "Fulano",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-        },
+          },
       },
       {
         id: "id-mock-comment2",
@@ -51,9 +49,7 @@ describe("Testando getCommentsByPost", () => {
         creator: {
           id: "id-mock-beltrana",
           nickname: "Beltrana",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-        },
+          },
       },
     ]);
   });

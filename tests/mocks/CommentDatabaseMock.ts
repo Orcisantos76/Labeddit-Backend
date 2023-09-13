@@ -77,7 +77,6 @@ export class CommentDatabaseMock extends BaseDatabase {
         return {
           ...comment,
           creator_nickname: creator!.nickname,
-          creator_avatar: creator!.avatar,
         };
       });
 
@@ -97,9 +96,6 @@ export class CommentDatabaseMock extends BaseDatabase {
       .map((comment) => ({
         ...comment,
         creator_nickname: nickname,
-        creator_avatar: usersMock.find(
-          (user) => user.id === comment.creator_id
-        )!.avatar,
       }));
 
     return commentsWithCreatorName;
@@ -119,7 +115,6 @@ export class CommentDatabaseMock extends BaseDatabase {
         return {
           ...comment,
           creator_nickname: creator!.nickname,
-          creator_avatar: creator!.avatar,
         };
       });
 
@@ -156,7 +151,6 @@ export class CommentDatabaseMock extends BaseDatabase {
         return {
           ...comment,
           creator_nickname: creator.nickname,
-          creator_avatar: creator.avatar,
         };
       }
     }
