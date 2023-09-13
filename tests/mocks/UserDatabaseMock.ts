@@ -18,8 +18,6 @@ export const usersMock: UserDB[] = [
     email: "fulano@email.com",
     password: "hash-mock-fulano", // senha = "fulano123"
     role: USER_ROLES.NORMAL,
-    avatar:
-      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
     created_at: dateString,
   },
   {
@@ -28,8 +26,6 @@ export const usersMock: UserDB[] = [
     email: "astrodev@email.com",
     password: "hash-mock-astrodev", // senha = "astrodev99"
     role: USER_ROLES.ADMIN,
-    avatar:
-      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
     created_at: dateString,
   },
   {
@@ -38,8 +34,7 @@ export const usersMock: UserDB[] = [
     email: "beltrana@email.com",
     password: "hash-mock-beltrana", // senha = "beltrana555"
     role: USER_ROLES.NORMAL,
-    avatar:
-      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+    
     created_at: dateString,
   },
 ];

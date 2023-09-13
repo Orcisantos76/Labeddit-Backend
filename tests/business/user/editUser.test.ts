@@ -25,7 +25,6 @@ describe("Testando getUsers", () => {
       nickname: "fulanozinho",
       email: "fulanozinho@example.com",
       password: "novaSenha123",
-      avatar: "http://example.com/avatar.png",
     });
 
     const output = await userBusiness.editUser(input);
@@ -33,40 +32,6 @@ describe("Testando getUsers", () => {
     expect(output).toEqual({
       message: "Cadastro atualizado com sucesso!",
     });
-  });
-
-  test("Deve retornar erro ao passar link de avatar inválido", async () => {
-    expect.assertions(3);
-
-    try {
-      const input = EditUserSchema.parse({
-        idToEdit: "id-mock-fulano",
-        token: "token-mock-fulano",
-        nickname: "fulanozinho",
-        email: "fulanozinho@example.com",
-        password: "novaSenha123",
-        avatar: "example.com",
-      });
-
-      const output = await userBusiness.editUser(input);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        expect(error.issues[0].message).toBe(
-          "'avatar' deve ser um link válido."
-        );
-
-        expect(error.issues[0].path[0]).toBe("avatar");
-
-        expect(error.issues).toEqual([
-          {
-            validation: "regex",
-            code: "invalid_string",
-            message: "'avatar' deve ser um link válido.",
-            path: ["avatar"],
-          },
-        ]);
-      }
-    }
   });
 
   test("Deve retornar erro ao tentar editar usuário com um token inválido", async () => {

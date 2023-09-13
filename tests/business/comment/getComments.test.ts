@@ -33,8 +33,6 @@ describe("Testando getComments", () => {
         creator: {
           id: "id-mock-fulano",
           nickname: "Fulano",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         },
       },
       {
@@ -48,8 +46,6 @@ describe("Testando getComments", () => {
         creator: {
           id: "id-mock-beltrana",
           nickname: "Beltrana",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         },
       },
       {
@@ -63,8 +59,6 @@ describe("Testando getComments", () => {
         creator: {
           id: "id-mock-beltrana",
           nickname: "Beltrana",
-          avatar:
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         },
       },
     ]);
