@@ -34,7 +34,6 @@ export const usersMock: UserDB[] = [
     email: "beltrana@email.com",
     password: "hash-mock-beltrana", // senha = "beltrana555"
     role: USER_ROLES.NORMAL,
-    
     created_at: dateString,
   },
 ];
